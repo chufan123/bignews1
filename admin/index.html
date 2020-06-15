@@ -91,6 +91,18 @@
                 }
             });
 
+            //二: 登出
+            //给登出按钮设置点击事件,删除本地保存的token
+            $('.logout').on('click',function(e) {
+                e.preventDefault();
+                if(confirm('确定要退出吗?')){
+                    //删除token
+                    localStorage.removeItem('token');
+                    window.location.href = './login.html';
+                };
+            })
+
+
         })
     </script>
 </body>
