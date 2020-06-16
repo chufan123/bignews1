@@ -76,7 +76,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-default" id="btnCancel" data-dismiss="modal">取消</button>
                     <button type="button" class="btn btn-primary" id="addOrEdit">Send message</button>
                 </div>
             </div>
@@ -91,7 +91,7 @@
             <td>{{v.slug}}</td>
             <td class="text-center">
                 <a href="javascript:void(0)" data-id="{{v.id}}" data-toggle="modal" data-target="#myModal" class=" btn btn-info btn-xs">编辑</a>
-                <a href="javascript:void(0)" data-id="{{v.id}}" class="btn btn-danger btn-xs">删除</a>
+                <a href="javascript:void(0)" data-id="{{v.id}}" id="btn-delete" class="btn btn-danger btn-xs">删除</a>
             </td>
         </tr>
         {{/each}}
@@ -129,6 +129,15 @@
                     //编辑分类
                     $('#exampleModalLabel').text('编辑分类');
                     $('#addOrEdit').text('编辑').addClass('btn-success').removeClass('btn-primary');
+
+                    //获取当前点击的编辑按钮 对应的 分类名和分类别名
+                    var categoryName = $(e.relatedTarget).parent().prev().prev().text().trim();
+                    var categorySlug = $(e.relatedTarget).parent().prev().text().trim();
+                    var categoryId = $(e.relatedTarget).attr('data-id');
+                    //把值赋值给弹出的模态框对应的标签
+                    $('#recipient-name').val(categoryName);
+                    $('#message-text').val(categorySlug);
+                    $('#categoryId').val(categoryId);
                 };
 
                 //三: 给模态框中的 新增/编辑 设置点击事件.
@@ -162,10 +171,72 @@
                         });
 
                     } else {
+                        //获取要编辑的 id 类名 和 类别名
                         // alert('编辑');
+                        var categoryName = $('#recipient-name').val().trim();//分类名
+                        var categorySlug = $('#message-text').val().trim(); //分类别名
+                        var categoryId = $('#categoryId').val();//id
+                        $.ajax({
+                            type: "post",
+                            url: BigNew.category_edit,
+                            data: {
+                                id: categoryId,
+                                name: categoryName,
+                                slug: categorySlug
+                            },
+                            success: function (backData) {
+                                // console.log(backData);
+                                if (backData.code == 200) {
+                                    alert('编辑成功!')
+                                    //把模态框隐藏
+                                    $('#myModal').modal('hide');
+                                    //编辑成功后重新加载数据渲染
+                                    getData();
+                                    //模态框输入的文本清空
+                                    $('#recipient-name').val('');
+                                    $('#message-text').val('');
+                                }
+                            }
+                        })
                     }
-                })
+                });
+
+                //四: 给取消按钮设置点击事件
+                $('#myModal #btnCancel').on('click', function () {
+                    //清空模态框中的表单的值
+                    //1.
+                    // $('#recipient-name').val('');
+                    // $('#message-text').val('');
+
+                    //2.
+                    $('#myModal form')[0].reset();//reset()方法是dom元素点出来的
+
+                });
+
             });
+            //五: 文章类别删除
+            //委托事件注册
+            $('tbody').on('click', '#btn-delete', function () {
+                //获取当前点击的删除按钮的id
+                var categoryId = $(this).attr('data-id');
+                // console.log(categoryId);
+                //发送ajax请求
+                if(confirm('确定要删除吗?')) {
+                    $.ajax({
+                        type: 'post',
+                        url: BigNew.category_delete,
+                        data: {
+                            id: categoryId
+                        },
+                        success: function (backData) {
+                            // console.log(backData);
+                            if (backData.code == 204) {
+                                getData();
+                            }
+                        }
+                    })
+                };
+            })
         })
     </script>
 </body>
