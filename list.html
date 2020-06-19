@@ -227,6 +227,95 @@
     </div>
     <!-- 导包template -->
     <script src="./js/template-web.js"></script>
+
+    <!-- 最新评论模板 -->
+    <script id="comment" type="text/html">
+        {{each data v}}
+        <li>
+            <span>{{v.author.substring(0,1)}}</span>
+            <b><em>{{v.author}}</em> {{v.date}} {{v.time}}说:</b>
+            <strong>{{v.intro}}</strong>
+        </li>
+        {{/each}}
+    </script>
+
+    <!-- 焦点关注模板 -->
+    <script id="attention" type="text/html">
+        {{each data v}}
+        <li><a href="./article.html?id={{v.id}}">{{v.intro}}</a></li>
+        {{/each}}
+    </script>
+
+    <!-- 文章分类模板 -->
+    <script id="category" type="text/html">
+        {{each data v}}
+        <li><a href="./list.html?categroyId={{v.id}}">{{v.name}}</a></li>
+        {{/each}}
+    </script>
+
+    <script>
+        //入口函数
+        $(function () {
+            //一: 一周热门排行
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:8080/api/v1/index/rank',
+                success: function (backData) {
+                    // console.log(backData);
+                    if (backData.code == 200) {
+                        //第一种方法:模板引擎
+                        // var resHtml = template('rank',backData);
+                        // $('ul.hotrank_list').html(resHtml);
+
+                        //第二种方法: 直接遍历数据,把对应的数据交给对应的标签
+                        for (var i = 0; i < backData.data.length; i++) {
+                            $('ul.content_list>li').eq(i).children('a').text(backData.data[i].title);
+                            $('ul.content_list>li').eq(i).children('a').attr('href', './article.html?id=' + backData.data[i].id);
+                        };
+                    }
+                }
+            });
+
+            //二: 最新评论
+            $.ajax({
+                url: 'http://localhost:8080/api/v1/index/latest_comment',
+                success: function (backData) {
+                    // console.log(backData);
+                    if (backData.code == 200) {
+                        var resHtml = template('comment', backData);
+                        $('ul.comment_list').html(resHtml);
+                    }
+                }
+            });
+
+            //三: 焦点关注
+            $.ajax({
+                url: 'http://localhost:8080/api/v1/index/attention',
+                success: function (backData) {
+                    // console.log(backData);
+                    if (backData.code == 200) {
+                        var resHtml = template('attention', backData);
+                        $('ul.guanzhu_list').html(resHtml);
+                    }
+                }
+            });
+
+            //四:文章分类
+            $.ajax({
+                url: 'http://localhost:8080/api/v1/index/category',
+                success: function (backData) {
+                    // console.log(backData);
+                    if (backData.code == 200) {
+                        var resHtml = template('category', backData);
+                        //竖着的
+                        $('ul.level_two').html('<li class="up"></li>' + resHtml);
+                        //横着的
+                        $('ul.left_menu').html(resHtml);
+                    }
+                }
+            });
+        })
+    </script>
 </body>
 
 </html>
