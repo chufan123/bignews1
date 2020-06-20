@@ -62,16 +62,24 @@
 
     <!-- 折线图 -->
     <script>
-        var json = '{"code":200,"msg":"获取成功","date":[{"date":"2019-05-20","count":23},{"date":"2019-05-21","count":19},{"date":"2019-05-22","count":29},{"date":"2019-05-23","count":24},{"date":"2019-05-24","count":28},{"date":"2019-05-25","count":28},{"date":"2019-05-26","count":19},{"date":"2019-05-27","count":25},{"date":"2019-05-28","count":25}]}';
-        var obj = JSON.parse(json);
-        loadEchars(obj);
+        // var json = '{"code":200,"msg":"获取成功","date":[{"date":"2019-05-20","count":23},{"date":"2019-05-21","count":19},{"date":"2019-05-22","count":29},{"date":"2019-05-23","count":24},{"date":"2019-05-24","count":28},{"date":"2019-05-25","count":28},{"date":"2019-05-26","count":19},{"date":"2019-05-27","count":25},{"date":"2019-05-28","count":25}]}';
+        // var obj = JSON.parse(json);
+        // loadEchars(obj);
+        //发送ajax请求,得到折线图数据
+        $.ajax({
+            url: 'http://localhost:8080/api/v1/admin/data/article',
+            success: function(backData) {
+                console.log(backData);
+                loadEchars(backData);
+            }
+        })
 
         function loadEchars(obj) {
             // 基于准备好的dom，初始化echarts实例
             var myChart = echarts.init(document.getElementById('curve_show'));
 
-            var data = [];
-            var date = [];
+            var data = [];//y轴数据
+            var date = [];//x轴数据
             for (var i = 0; i < obj.date.length; i++) {
                 data.push(obj.date[i].count);
                 date.push(obj.date[i].date);
@@ -114,7 +122,8 @@
                 },
                 yAxis: {
                     type: 'value',
-                    boundaryGap: [0, '100%']
+                    boundaryGap: [0, '100%'],
+                    max: 40
                 },
                 series: [
                     {
